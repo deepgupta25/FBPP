@@ -1,0 +1,162 @@
+erDiagram
+    %% Core Tables
+    USERS {
+        int user_id PK
+        string email UK
+        string password_hash
+        string first_name
+        string last_name
+        string phone
+        timestamp created_at
+        timestamp last_login
+        string status
+        string profile_image_url
+    }
+    
+    PARTNERS {
+        int partner_id PK
+        string name UK
+        string tier
+        string description
+        string website
+        string address
+        timestamp created_at
+        string status
+    }
+    
+    ROLES {
+        int role_id PK
+        string name UK
+        string description
+    }
+    
+    PERMISSIONS {
+        int permission_id PK
+        string name UK
+        string description
+    }
+    
+    %% Junction Tables
+    USER_ROLES {
+        int user_id PK,FK
+        int role_id PK,FK
+        int partner_id PK,FK
+        timestamp assigned_at
+        int assigned_by FK
+    }
+    
+    ROLE_PERMISSIONS {
+        int role_id PK,FK
+        int permission_id PK,FK
+    }
+    
+    %% Business Logic Tables
+    DEALS {
+        int deal_id PK
+        int partner_id FK
+        string customer_name
+        string customer_email
+        string customer_phone
+        string title
+        decimal value
+        string stage
+        int probability
+        date expected_close_date
+        date actual_close_date
+        timestamp created_at
+        timestamp updated_at
+        int assigned_to FK
+        int created_by FK
+    }
+    
+    LEADS {
+        int lead_id PK
+        int partner_id FK
+        string customer_name
+        string customer_email
+        string customer_phone
+        string company
+        string title
+        string source
+        string status
+        string notes
+        timestamp created_at
+        timestamp updated_at
+        int assigned_to FK
+        int created_by FK
+        int converted_to_deal FK
+    }
+    
+    RESOURCES {
+        int resource_id PK
+        string title
+        string description
+        string file_url
+        string file_type
+        string category
+        string visibility
+        timestamp created_at
+        timestamp updated_at
+        int created_by FK
+    }
+    
+    REWARDS {
+        int reward_id PK
+        int user_id FK
+        decimal amount
+        string reward_type
+        string status
+        string issued_for
+        int deal_id FK
+        timestamp issued_at
+        timestamp expires_at
+        timestamp claimed_at
+    }
+    
+    ACTIVITY_LOGS {
+        int log_id PK
+        int user_id FK
+        string action
+        string entity_type
+        int entity_id
+        string description
+        timestamp created_at
+        string ip_address
+    }
+    
+    ANNOUNCEMENTS {
+        int announcement_id PK
+        string title
+        string content
+        string visibility
+        timestamp created_at
+        timestamp expires_at
+        int created_by FK
+    }
+    
+    %% Define relationships
+    USERS ||--o{ USER_ROLES : has
+    ROLES ||--o{ USER_ROLES : assigned_to
+    PARTNERS ||--o{ USER_ROLES : belongs_to
+    USERS ||--o{ USER_ROLES : assigned_by
+    
+    ROLES ||--o{ ROLE_PERMISSIONS : has
+    PERMISSIONS ||--o{ ROLE_PERMISSIONS : assigned_to
+    
+    PARTNERS ||--o{ DEALS : has
+    USERS ||--o{ DEALS : assigned_to
+    USERS ||--o{ DEALS : created_by
+    
+    PARTNERS ||--o{ LEADS : has
+    USERS ||--o{ LEADS : assigned_to
+    USERS ||--o{ LEADS : created_by
+    DEALS ||--o{ LEADS : converted_from
+    
+    USERS ||--o{ RESOURCES : created_by
+    
+    USERS ||--o{ REWARDS : receives
+    DEALS ||--o{ REWARDS : generated_from
+    
+    USERS ||--o{ ACTIVITY_LOGS : performs
+    
+    USERS ||--o{ ANNOUNCEMENTS : created_by
